@@ -197,6 +197,7 @@ celerybeat.pid
 # Environments
 .env
 .venv
+envs
 env/
 venv/
 ENV/
@@ -220,3 +221,6 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+MC2
+MC2-Image-Data
