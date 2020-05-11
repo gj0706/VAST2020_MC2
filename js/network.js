@@ -73,7 +73,7 @@ d3.json('data/data.json').then(function(data){
 
 
 
-// nest data by `size` and then `category`
+// nest data
     let innerNode = _.values(nest(data, ['PersonId', 'Label']));
     let outerNode = nest(data, ['Label', 'PersonId']);
     console.log(innerNode);
@@ -83,13 +83,17 @@ d3.json('data/data.json').then(function(data){
     // let n = _.values(innerNode.map((d, i)=>{return{"node": (i+1).toString(), "links": _.values(d)}}));
     // console.log(n);
 
+    let links = [];
     innerNode.forEach((d, i)=>{
 
         d["node"] = (i+1).toString(),
-        d["links"] = Object.keys(d).filter(d=>d !== "node").map((v)=>{ return {"source": (i+1).toString(), "target": v }}),
+        d["links"] = Object.keys(d).filter(d=>d !== "node").map((v)=>{ return {"source": (i+1).toString(), "target": v, "width": d[v].length }}),
         d["info"] = Object.values(d)
+        links.push(Object.keys(d).filter(d=>d !== "node").map((v)=>{ return {"source": (i+1).toString(), "target": v, "width": d[v].length }}));
 
     });
+
+
     // let l = _.values(innerNode.map((d, i)=>{return{"node": (i+1).toString(), "links": d}}));
     outerNode = _.map(outerNode, (obj, key)=>{
         obj.node = key;
@@ -99,13 +103,17 @@ d3.json('data/data.json').then(function(data){
 
     // let final = _.map(_.map(_.values(innerNode.map((d, i)=>{return{"node": (i+1).toString(), "links": d}})), d=>d.links), d=>{return{"target": _.keys(d), "info": _.values(d)}})
 
-    outerNode.forEach((d, i)=>{
+    outerNode.forEach((d)=>{
         // d["node"] = d["Label"],
-        d["links"] = Object.keys(d).filter(d=>d !== "node"),
+        d["links"] = Object.keys(d).filter(d=>d !== "node").map((v,i)=>{ return {"source": d.node, "target": v, "width": d[v].length}}),
         d["info"] = Object.values(d)
     });
 
+
+
     data = {"inner": innerNode, "outer": outerNode}
+
+
     let d = {};
     drawConMap( data, "#conMap")
 
@@ -147,24 +155,39 @@ function drawConMap(data, selector){
             return d;
         });
 
+    let iLinkArr = [];
+    data.inner.forEach((d, i)=>{
+        iLinkArr.push({"x": d.x, "y": d.y, "link": d.links })
+        return iLinkArr
+    });
+    console.log(iLinkArr);
+
+    let oLinkArr = [];
+    data.outer.forEach((d, i)=>{
+        oLinkArr.push({"x": d.x, "y": d.y, "link": d.links })
+        return oLinkArr
+    });
+    console.log(oLinkArr);
+    let links = {"inner": iLinkArr, "outer": oLinkArr};
+
     // define link layout between two nodes
-    let link = d3.linkVertical()
-        .source(function(d) { return {"x": d.outer.y * Math.cos(projectX(d.outer.x)),
-            "y": -d.outer.y * Math.sin(projectX(d.outer.x))}; })
-        .target(function(d) { return {"x": d.inner.y + rect_height/2,
-            "y": d.outer.x > 180 ? d.inner.x : d.inner.x + rect_width}; })
-        .projection(function(d) { return [d.y, d.x]; });
+    // let link = d3.linkVertical()
+    //     .source(function(d) { return {"x": d.outer.y * Math.cos(projectX(d.outer.x)),
+    //         "y": -d.outer.y * Math.sin(projectX(d.outer.x))}; })
+    //     .target(function(d) { return {"x": d.inner.y + rect_height/2,
+    //         "y": d.outer.x > 180 ? d.inner.x : d.inner.x + rect_width}; })
+    //     .projection(function(d) { return [d.y, d.x]; });
 
-    let source = function(d) {
-        return {
-            "x": d.outer.y * Math.cos(projectX(d.outer.x)),
-            "y": -d.outer.y * Math.sin(projectX(d.outer.x))
-        };
-    }
+    // let source = function(d) {
+    //     return {
+    //         "x": d.outer.y * Math.cos(projectX(d.outer.x)),
+    //         "y": -d.outer.y * Math.sin(projectX(d.outer.x))
+    //     };
+    // }
 
 
-    console.log(source(data));
-
+    // let link = d3.LinkVertical()
+    //     .source(d=>d.)
     // svg.selectAll(null)
     //     .data(data.inner)
     //     .enter()
