@@ -61,15 +61,6 @@ d3.json('data/data.json').then(function(data){
     // console.log(grouped);
 
     // uses lodash `mapValues` and `groupBy` to recursively nest the data
-    let nest = function (seq, keys) {
-        if (!keys.length)
-            return seq;
-        let first = keys[0];
-        let rest = keys.slice(1);
-        return _.mapValues(_.groupBy(seq, first), function (value) {
-            return nest(value, rest)
-        });
-    };
 
 
 
@@ -95,6 +86,7 @@ d3.json('data/data.json').then(function(data){
 
 
     // let l = _.values(innerNode.map((d, i)=>{return{"node": (i+1).toString(), "links": d}}));
+    // Transform data for outer nodes
     outerNode = _.map(outerNode, (obj, key)=>{
         obj.node = key;
         return obj
@@ -142,33 +134,57 @@ function drawConMap(data, selector){
         .domain([0, config.oLength])
         .range([0, config.diameter / 2 - 120]);
 
-    // Setup positions
-        data.inner = data.inner.map(function(d, i) {
-            d.x = -(config.rect_width / 2);
-            d.y = innerY(i);
-            return d;
-        });
+    // Setup the positions of inner nodes
+    data.inner = data.inner.map(function(d, i) {
+        d.x = -(config.rect_width / 2);
+        d.y = innerY(i);
+        return d;
+    });
 
-        data.outer = data.outer.map(function(d, i) {
-            d.x = outerX(i);
-            d.y = config.diameter/3;
-            return d;
-        });
+    // Setup the positions of outer nodes
+    data.outer = data.outer.map(function(d, i) {
+        d.x = outerX(i);
+        d.y = config.diameter/3;
+        return d;
+    });
 
-    let iLinkArr = [];
+    // create  links data, including source nodes, target nodes and their positions
+    let links = [];
     data.inner.forEach((d, i)=>{
-        iLinkArr.push({"x": d.x, "y": d.y, "link": d.links })
-        return iLinkArr
+        // links.push({"x": d.x, "y": d.y, "link": d.links })
+        d.links.map(v=>{
+            v.sourceX = d.x;
+            v.sourceY = d.y;
+            return d;
+        })
+        d.links.forEach(e=>{
+            links.push(e);
+        })
+        // links.push(d.links);
+        return links
     });
-    console.log(iLinkArr);
+    console.log(links);
 
-    let oLinkArr = [];
+    // Create the mapping of target nodes and their positions
+    let targetPos = [];
     data.outer.forEach((d, i)=>{
-        oLinkArr.push({"x": d.x, "y": d.y, "link": d.links })
-        return oLinkArr
+        targetPos.push({"targetX": d.x, "targetY": d.y, "target": d.node })
+        return targetPos
     });
-    console.log(oLinkArr);
-    let links = {"inner": iLinkArr, "outer": oLinkArr};
+    console.log(targetPos);
+
+    // Join target positions with links data by target nodes
+    links.forEach(d=>{
+        targetPos.forEach((v=>{
+            if (d.target === v.target){
+              d.targetX = v.targetX;
+              d.targetY = v.targetY;
+            }
+        }))
+    })
+    console.log(links);
+
+    // let links = {"inner": links, "outer": oLinkArr};
 
     // define link layout between two nodes
     // let link = d3.linkVertical()
@@ -186,15 +202,25 @@ function drawConMap(data, selector){
     // }
 
 
-    // let link = d3.LinkVertical()
-    //     .source(d=>d.)
-    // svg.selectAll(null)
-    //     .data(data.inner)
-    //     .enter()
-    //     .append("path")
-    //     .attr("fill", "none")
-    //     .attr("stroke", "blue")
-    //     .attr("d", linkRadical);
+    let link = d3.linkVertical()
+        .source(d=>[-d.targetY * Math.cos(projectX(d.targetX)), d.targetY * Math.cos(projectX(d.targetX))])
+        // .source(d=>[ d.targetY * Math.cos(projectX(d.targetX)), -d.targetY * Math.cos(projectX(d.targetX))])
+
+        .target(d=>[d.targetX > 180 ? d.sourceX : d.sourceX + config.rect_width, d.sourceY + config.rect_height / 2])
+        // .target(d=>[ d.sourceY + config.rect_height / 2, d.targetX > 180 ? d.sourceX : d.sourceX + config.rect_width])
+
+    // .angle(d=>outerX(d.targetX))
+        // .radius(d=>outerY(d.targetY));
+
+    svg.selectAll(null)
+        .data(links)
+        .enter()
+        .append("path")
+        .attr("class", "links")
+        .attr("id", d=>d.source + "-" + d.target)
+        .attr("fill", "none")
+        .attr("stroke", "grey")
+        .attr("d", link);
 
     let onode = svg.append('g').selectAll(".outer_node")
         .data(data.outer)
@@ -272,6 +298,15 @@ function drawConMap(data, selector){
 //     return colors[c];
 // }
 
+let nest = function (seq, keys) {
+    if (!keys.length)
+        return seq;
+    let first = keys[0];
+    let rest = keys.slice(1);
+    return _.mapValues(_.groupBy(seq, first), function (value) {
+        return nest(value, rest)
+    });
+};
 
 function projectX(x)
 {
