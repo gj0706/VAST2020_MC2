@@ -19,6 +19,35 @@ h4 {
 }
 
 text {
-    font: 10px sans-serif;
-    text-anchor: middle;
+    /*font: 10px sans-serif;*/
+    /*text-anchor: middle;*/
+    pointer-events: none;
+
+}
+
+svg {
+    font: 12px sans-serif;
+}
+
+
+.inner_node {
+    pointer-events: all;
+}
+
+
+.outer_node circle {
+    fill: #fff;
+    stroke: steelblue;
+    stroke-width: 1.5px;
+    pointer-events: all;
+}
+
+.outer_node circle.highlight
+{
+    stroke: #315B7E;
+    stroke-width: 2px;
+}
+
+.link {
+    fill: none;
 }
