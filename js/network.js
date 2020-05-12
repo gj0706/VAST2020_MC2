@@ -127,12 +127,20 @@ function drawConMap(data, selector){
     // Set the x scale of outer nodes
     let outerX = d3.scaleLinear()
         .domain([0, config.mid, config.mid, config.oLength])
-        .range([15, 170, 190 ,355]);
+        .range([15, 170, 200 ,355]);
+
+    // let outerX = d3.scaleLinear()
+    //     .domain([0, 22])
+    //     .range([0,  Math.PI * 2]);
 
     // Set the y scale of outer nodes
     let outerY = d3.scaleLinear()
         .domain([0, config.oLength])
         .range([0, config.diameter / 2 - 120]);
+
+    // let outerY = d3.scaleLinear()
+    //     .domain([0, config.oLength])
+    //     .range([0, config.diameter / 2 - 120]);
 
     // Setup the positions of inner nodes
     data.inner = data.inner.map(function(d, i) {
@@ -145,6 +153,8 @@ function drawConMap(data, selector){
     data.outer = data.outer.map(function(d, i) {
         d.x = outerX(i);
         d.y = config.diameter/3;
+        // d.y = outerY(i);
+
         return d;
     });
 
@@ -184,44 +194,25 @@ function drawConMap(data, selector){
     })
     console.log(links);
 
-    // let links = {"inner": links, "outer": oLinkArr};
 
-    // define link layout between two nodes
-    // let link = d3.linkVertical()
-    //     .source(function(d) { return {"x": d.outer.y * Math.cos(projectX(d.outer.x)),
-    //         "y": -d.outer.y * Math.sin(projectX(d.outer.x))}; })
-    //     .target(function(d) { return {"x": d.inner.y + rect_height/2,
-    //         "y": d.outer.x > 180 ? d.inner.x : d.inner.x + rect_width}; })
-    //     .projection(function(d) { return [d.y, d.x]; });
-
-    // let source = function(d) {
-    //     return {
-    //         "x": d.outer.y * Math.cos(projectX(d.outer.x)),
-    //         "y": -d.outer.y * Math.sin(projectX(d.outer.x))
-    //     };
-    // }
-
-
-    let link = d3.linkVertical()
-        .source(d=>[-d.targetY * Math.cos(projectX(d.targetX)), d.targetY * Math.cos(projectX(d.targetX))])
-        // .source(d=>[ d.targetY * Math.cos(projectX(d.targetX)), -d.targetY * Math.cos(projectX(d.targetX))])
-
+    // Define link layout
+    let link = d3.linkHorizontal()
+        .source(d=>[-d.targetY * Math.sin(projectX(d.targetX)), d.targetY * Math.cos(projectX(d.targetX))])
         .target(d=>[d.targetX > 180 ? d.sourceX : d.sourceX + config.rect_width, d.sourceY + config.rect_height / 2])
-        // .target(d=>[ d.sourceY + config.rect_height / 2, d.targetX > 180 ? d.sourceX : d.sourceX + config.rect_width])
 
-    // .angle(d=>outerX(d.targetX))
-        // .radius(d=>outerY(d.targetY));
-
-    svg.selectAll(null)
+    // Append links to svg
+    svg.selectAll(".links")
         .data(links)
         .enter()
         .append("path")
         .attr("class", "links")
         .attr("id", d=>d.source + "-" + d.target)
         .attr("fill", "none")
-        .attr("stroke", "grey")
+        .attr("stroke", "steelblue")
+        // .attr("d", d=>diagonal(d))
         .attr("d", link);
 
+    // Append outer nodes (circles)
     let onode = svg.append('g').selectAll(".outer_node")
         .data(data.outer)
         .enter().append("g")
@@ -232,7 +223,7 @@ function drawConMap(data, selector){
 
     onode.append("circle")
         .attr('id', function(d) { return d.node })
-        .attr("r", 4.5);
+        .attr("r", 5);
 
     onode.append("circle")
         .attr('r', 20)
@@ -251,7 +242,6 @@ function drawConMap(data, selector){
         .data(data.inner)
         .enter().append("g")
         .attr("class", "inner_node")
-        // .attr("transform", "translate(" + margin.top + "," + margin.left + ")")
         .attr("transform", (d, i)=> "translate(" + d.x + "," + d.y + ")")
         .on("mouseover", mouseover)
         .on("mouseout", mouseout);
@@ -273,6 +263,8 @@ function drawConMap(data, selector){
         // .attr("x", 20 )
         // .attr("y", (d, i)=> i * config.rect_height)
         .attr("xlink:href", "img/user.png");
+
+
         // .attr("transform", d=>"translate(" +)
     // inode.append("text")
     //     .attr('id', function(d, i) { return 'Person-'+ (i+1).toString() + '-txt'; })
@@ -307,6 +299,15 @@ let nest = function (seq, keys) {
         return nest(value, rest)
     });
 };
+
+// let diagonal = function link(d) {
+//     return "M" + d.sourceY + "," + d.sourceX
+//         + "C" + (d.sourceY + d.targetY) / 2 + "," + d.sourceX
+//         + " " + (d.sourceY + d.targetY) / 2 + "," + d.targetX
+//         + " " + d.targetY + "," + d.targetX;
+// }
+
+
 
 function projectX(x)
 {
