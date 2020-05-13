@@ -208,7 +208,8 @@ function drawConMap(data, selector){
         .attr("class", "links")
         .attr("id", d=>d.source + "-" + d.target)
         .attr("fill", "none")
-        .attr("stroke", "steelblue")
+        .attr("stroke", "orange")
+        .attr("stroke-width", d=>d.width/10)
         // .attr("d", d=>diagonal(d))
         .attr("d", link);
 
@@ -315,6 +316,17 @@ function projectX(x)
 }
 
 function mouseover(){
+
+    d3.selectAll('.links .link').sort(function(a, b){ return d.related_links.indexOf(a.id); });
+
+    for (var i = 0; i < d.related_nodes.length; i++)
+    {
+        d3.select('#' + d.related_nodes[i]).classed('highlight', true);
+        d3.select('#' + d.related_nodes[i] + '-txt').attr("font-weight", 'bold');
+    }
+
+    for (var i = 0; i < d.related_links.length; i++)
+        d3.select('#' + d.related_links[i]).attr('stroke-width', '5px');
 
 }
 
