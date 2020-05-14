@@ -34,20 +34,40 @@ svg {
     pointer-events: all;
 }
 
+.inner_node rect {
+    pointer-events: all;
+    stroke: #1d3557;
+    fill: #aaaaaa;
+}
+
+.inner_node rect.highlight {
+    stroke: #e63946;
+    stroke-width: 2px;
+}
 
 .outer_node circle {
-    fill: #fff;
-    stroke: steelblue;
+    fill: #f1faee;
+    stroke: #1d3557;
     stroke-width: 1.5px;
     pointer-events: all;
 }
 
 .outer_node circle.highlight
 {
-    stroke: #315B7E;
+    stroke: #e63946;
     stroke-width: 2px;
+}
+
+outer_node text.highlight{
+    stroke:#e63946;
+
 }
 
 .link {
     fill: none;
+    /*stroke: #a8dadc;*/
 }
+
+/*.link path.highlight{*/
+/*    stroke: #fc4903;*/
+/*}*/
