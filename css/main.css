@@ -43,6 +43,7 @@ svg {
 .inner_node rect.highlight {
     stroke: #e63946;
     stroke-width: 2px;
+    fill: #f1faee;
 }
 
 .outer_node circle {
@@ -59,8 +60,7 @@ svg {
 }
 
 outer_node text.highlight{
-    stroke:#e63946;
-
+    /*stroke:#e63946;*/
 }
 
 .link {
