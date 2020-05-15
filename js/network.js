@@ -1,4 +1,8 @@
-
+d3.selection.prototype.moveToFront = function() {
+    return this.each(function(){
+        this.parentNode.appendChild(this);
+    });
+};
 
 const labels = ['birdCall',
     'blueSunglasses',
@@ -33,9 +37,9 @@ const margin ={
 const config = {
     "width": 1000 - margin.left - margin.right,
     "height": 1000 - margin.top - margin.bottom,
-    "rect_width": 14,
+    "rect_width": 38,
     "rect_height": 14,
-    "link_width": "1px",
+    "link_width": "5px",
     "diameter": 960,
     // "colors": ["#a50026","#d73027","#f46d43","#fdae61","#fee090","#ffffbf","#e0f3f8","#abd9e9","#74add1","#4575b4","#313695"],
     "iLength": 40,
@@ -45,14 +49,9 @@ const config = {
 
 
 
+// let linkData;
 
 
-function showLargeImage(thumbnail) {
-    document.getElementById('wup').src = thumbnail.src
-    document.querySelector("#wup").style.visibility = "visible";
-    document.querySelector("button").style.visibility = "visible";
-    document.querySelector("#cover").style.visibility = "visible";
-}
 // Load the data
 
 d3.json('data/data.json').then(function(data){
@@ -77,11 +76,13 @@ d3.json('data/data.json').then(function(data){
     let links = [];
     innerNode.forEach((d, i)=>{
 
-        d["node"] = (i+1).toString(),
-        d["links"] = Object.keys(d).filter(d=>d !== "node").map((v)=>{ return {"source": (i+1).toString(), "target": v, "width": d[v].length }}),
-        d["info"] = Object.values(d)
-        links.push(Object.keys(d).filter(d=>d !== "node").map((v)=>{ return {"source": (i+1).toString(), "target": v, "width": d[v].length }}));
-
+        d["node"] = `uer-${(i+1).toString()}`;
+        d["links"] = _.keys(d).filter(d=>d !== "node").map((v)=>{ return {"source": `uer-${(i+1).toString()}`, "target": v, "width": d[v].length }});
+        // d["info"] = Object.values(d)
+        links.push(_.keys(d).filter(d=>d !== "node").map((v)=>{ return {"source": `uer-${(i+1).toString()}`, "target": v, "width": d[v].length }}));
+        d["relatedNodes"] = _.keys(d).filter(v=>(v !== "node") && (v !== "links"));
+        d["relatedNodes"].push(d["node"]);
+        d["relatedLinks"] = d["relatedNodes"].map(v=>d["node"] + "-" + v);
     });
 
 
@@ -97,8 +98,10 @@ d3.json('data/data.json').then(function(data){
 
     outerNode.forEach((d)=>{
         // d["node"] = d["Label"],
-        d["links"] = Object.keys(d).filter(d=>d !== "node").map((v,i)=>{ return {"source": d.node, "target": v, "width": d[v].length}}),
-        d["info"] = Object.values(d)
+        d["links"] = _.keys(d).filter(d=>(d !== "node") && (d !== "links")).map((v,i)=>{ return {"source": d.node, "target": `uer-${v}`, "width": d[v].length}});
+        d["relatedNodes"] = _.keys(d).filter(d=>(d !== "node") && (d !== "links")).map(v=>`uer-${v}`);
+        d["relatedLinks"] = d["relatedNodes"].filter(d=>(d !== "node") && (d !== "links")).map(v=>`${v}-${d["node"]}`);
+        // d["info"] = Object.values(d)
     });
 
 
@@ -129,18 +132,9 @@ function drawConMap(data, selector){
         .domain([0, config.mid, config.mid, config.oLength])
         .range([15, 170, 200 ,355]);
 
-    // let outerX = d3.scaleLinear()
-    //     .domain([0, 22])
-    //     .range([0,  Math.PI * 2]);
-
-    // Set the y scale of outer nodes
     let outerY = d3.scaleLinear()
         .domain([0, config.oLength])
         .range([0, config.diameter / 2 - 120]);
-
-    // let outerY = d3.scaleLinear()
-    //     .domain([0, config.oLength])
-    //     .range([0, config.diameter / 2 - 120]);
 
     // Setup the positions of inner nodes
     data.inner = data.inner.map(function(d, i) {
@@ -194,22 +188,27 @@ function drawConMap(data, selector){
     })
     console.log(links);
 
+    // Global variable used in mouseover and mouseout functions
+    // linkData = links;
+
 
     // Define link layout
     let link = d3.linkHorizontal()
         .source(d=>[-d.targetY * Math.sin(projectX(d.targetX)), d.targetY * Math.cos(projectX(d.targetX))])
         .target(d=>[d.targetX > 180 ? d.sourceX : d.sourceX + config.rect_width, d.sourceY + config.rect_height / 2])
 
-    // Append links to svg
-    svg.selectAll(".links")
+    // Append links between inner nodes and outer nodes
+    let nodeLink = svg
+        .append("g").attr("class", "links")
+        .selectAll(".link")
         .data(links)
         .enter()
         .append("path")
-        .attr("class", "links")
-        .attr("id", d=>d.source + "-" + d.target)
+        .attr("class", "link")
+        .attr("id", d=>`${d.source}-${d.target}`)
         .attr("fill", "none")
-        .attr("stroke", "orange")
-        .attr("stroke-width", d=>d.width/10)
+        .attr("stroke", "#457b9d")
+        .attr("stroke-width", d=>d.width/6)
         // .attr("d", d=>diagonal(d))
         .attr("d", link);
 
@@ -223,15 +222,15 @@ function drawConMap(data, selector){
         .on("mouseout", mouseout);
 
     onode.append("circle")
-        .attr('id', function(d) { return d.node })
+        .attr('id', d=>d.node)
         .attr("r", 5);
 
-    onode.append("circle")
-        .attr('r', 20)
-        .attr('visibility', 'hidden');
+    // onode.append("circle")
+    //     .attr('r', 20)
+    //     .attr('visibility', 'hidden');
 
     onode.append("text")
-        .attr('id', function(d) { return d.node + '-txt'; })
+        .attr('id', d=>d.node + '-txt')
         .attr("dy", ".31em")
         .attr("text-anchor", function(d) { return d.x < 180 ? "start" : "end"; })
         .attr("transform", function(d) { return d.x < 180 ? "translate(8)" : "rotate(180)translate(-8)"; })
@@ -247,31 +246,34 @@ function drawConMap(data, selector){
         .on("mouseover", mouseover)
         .on("mouseout", mouseout);
 
-    // inode.append('rect')
-    //     .attr('width', config.rect_width)
-    //     .attr('height', config.rect_height)
-    //     .attr("x", 20 )
-    //     .attr("y", (d, i)=> i * config.rect_height)
-    //     .attr('id', function(d,i) { return "Person-" + (i+1).toString(); })
-    //     .attr("stroke", "black")
-    //     .attr('fill', function(d, i) { return config.colors[i]; });
-    // Append user icons
-    inode.append("image")
-        .attr("class", "userIcon")
-        .attr("id", d=>`user-${d.node}`)
-        .attr("width", config.rect_width)
-        .attr("height", config.rect_height)
+    inode.append('rect')
+        .attr('width', config.rect_width)
+        .attr('height', config.rect_height)
         // .attr("x", 20 )
         // .attr("y", (d, i)=> i * config.rect_height)
-        .attr("xlink:href", "img/user.png");
+        .attr('id', d=>d.node)
+        // .attr("stroke", "black")
+        // .attr('fill',"#32d3eb");
+    // Append user icons
+    // inode.append("image")
+    //     .attr("class", "userIcon")
+    //     .attr("id", d=>d.node)
+    //     .attr("width", config.rect_width)
+    //     .attr("height", config.rect_height)
+    //     // .attr("x", 20 )
+    //     // .attr("y", (d, i)=> i * config.rect_height)
+    //     .attr("xlink:href", "img/user.png")
+
+
+    d3.select(self.frameElement).style("height", config.diameter - 150 + "px");
 
 
         // .attr("transform", d=>"translate(" +)
-    // inode.append("text")
-    //     .attr('id', function(d, i) { return 'Person-'+ (i+1).toString() + '-txt'; })
-    //     .attr('text-anchor', 'middle')
-    //     .attr("transform", "translate(" + config.rect_width/2 + ", " + config.rect_height * .75 + ")")
-    //     .text(function(d, i) { return  (i+1).toString(); });
+    inode.append("text")
+        // .attr('id', d=>d.node)
+        .attr('text-anchor', 'middle')
+        .attr("transform", "translate(" + config.rect_width/2 + ", " + config.rect_height * .75 + ")")
+        .text(d=>d.node);
 
 
 
@@ -315,21 +317,40 @@ function projectX(x)
     return ((x - 90) / 180 * Math.PI) - (Math.PI/2);
 }
 
-function mouseover(){
+function mouseover(d){
 
-    d3.selectAll('.links .link').sort(function(a, b){ return d.related_links.indexOf(a.id); });
+    // Bring to front
+    d3.selectAll('.links .link').sort(function(a, b){ return d.relatedLinks.indexOf(a.node); });
 
-    for (var i = 0; i < d.related_nodes.length; i++)
+    for (let i = 0; i < d.relatedNodes.length; i++)
     {
-        d3.select('#' + d.related_nodes[i]).classed('highlight', true);
-        d3.select('#' + d.related_nodes[i] + '-txt').attr("font-weight", 'bold');
+        d3.select(`#${d.relatedNodes[i]}`).classed('highlight', true);
+            // .attr("width", 18).attr("height", 18);
+        d3.select(`#${d.relatedNodes[i]}-txt`).attr("font-weight", 'bold');
     }
 
-    for (var i = 0; i < d.related_links.length; i++)
-        d3.select('#' + d.related_links[i]).attr('stroke-width', '5px');
-
+    for (let i = 0; i < d.relatedLinks.length; i++){
+        d3.select(`#${d.relatedLinks[i]}`).moveToFront().attr('stroke', '#fc4903');
+    }
 }
 
-function mouseout(){
+function mouseout(d){
 
+    for (let i = 0; i < d.relatedNodes.length; i++)
+    {
+        d3.select(`#${d.relatedNodes[i]}`).classed('highlight', false);
+            // .attr("width", config.rect_width).attr("height", config.rect_height);
+        d3.select(`#${d.relatedNodes[i]}-txt`).attr("font-weight", 'normal');
+    }
+
+    for (let i = 0; i < d.relatedLinks.length; i++){
+        d3.select(`#${d.relatedLinks[i]}`).attr("stroke", "#457b9d" );
+    }
+}
+
+function showLargeImage(thumbnail) {
+    document.getElementById('wup').src = thumbnail.src
+    document.querySelector("#wup").style.visibility = "visible";
+    document.querySelector("button").style.visibility = "visible";
+    document.querySelector("#cover").style.visibility = "visible";
 }
