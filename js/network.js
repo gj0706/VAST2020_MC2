@@ -66,6 +66,12 @@ d3.json('data/data.json').then(function(data){
 // nest data
     let innerNode = _.values(nest(data, ['PersonId', 'Label']));
     let outerNode = nest(data, ['Label', 'PersonId']);
+    let grouped = _.values(nest(data, ['PersonId', "ImageId"]));
+    let nested = _.map(grouped, (d,i)=>{return {"user": `user-${i+1}`, "images": _.map(_.keys(d), v=>{return {"imageId": v, "objects": _.map(d[v], o=>{return {"label": o.Label, "info": o}})}}) }})
+
+
+
+
     console.log(innerNode);
     // document.write(JSON.stringify(nested, null, 4));
     // let arr = _.values(_.mapKeys(nested, function(value, key) { value.id = key; return value; }));
@@ -76,10 +82,10 @@ d3.json('data/data.json').then(function(data){
     let links = [];
     innerNode.forEach((d, i)=>{
 
-        d["node"] = `uer-${(i+1).toString()}`;
-        d["links"] = _.keys(d).filter(d=>d !== "node").map((v)=>{ return {"source": `uer-${(i+1).toString()}`, "target": v, "width": d[v].length }});
-        // d["info"] = Object.values(d)
-        links.push(_.keys(d).filter(d=>d !== "node").map((v)=>{ return {"source": `uer-${(i+1).toString()}`, "target": v, "width": d[v].length }}));
+        d["node"] = `user-${(i+1).toString()}`;
+        d["links"] = _.keys(d).filter(d=>d !== "node").map((v)=>{ return {"source": `user-${(i+1).toString()}`, "target": v, "width": d[v].length }});
+        d["info"] = Object.values(d)
+        links.push(_.keys(d).filter(d=>d !== "node").map((v)=>{ return {"source": `user-${(i+1).toString()}`, "target": v, "width": d[v].length }}));
         d["relatedNodes"] = _.keys(d).filter(v=>(v !== "node") && (v !== "links"));
         d["relatedNodes"].push(d["node"]);
         d["relatedLinks"] = d["relatedNodes"].map(v=>d["node"] + "-" + v);
@@ -98,10 +104,10 @@ d3.json('data/data.json').then(function(data){
 
     outerNode.forEach((d)=>{
         // d["node"] = d["Label"],
-        d["links"] = _.keys(d).filter(d=>(d !== "node") && (d !== "links")).map((v,i)=>{ return {"source": d.node, "target": `uer-${v}`, "width": d[v].length}});
-        d["relatedNodes"] = _.keys(d).filter(d=>(d !== "node") && (d !== "links")).map(v=>`uer-${v}`);
+        d["links"] = _.keys(d).filter(d=>(d !== "node") && (d !== "links")).map((v,i)=>{ return {"source": d.node, "target": `user-${v}`, "width": d[v].length}});
+        d["relatedNodes"] = _.keys(d).filter(d=>(d !== "node") && (d !== "links")).map(v=>`user-${v}`);
         d["relatedLinks"] = d["relatedNodes"].filter(d=>(d !== "node") && (d !== "links")).map(v=>`${v}-${d["node"]}`);
-        // d["info"] = Object.values(d)
+        d["info"] = Object.values(d)
     });
 
 
@@ -109,8 +115,11 @@ d3.json('data/data.json').then(function(data){
     data = {"inner": innerNode, "outer": outerNode}
 
 
-    let d = {};
-    drawConMap( data, "#conMap")
+    // Test
+    let user1 = nested.filter(d=>d.user === "user-1")[0].images;
+    // drawBarchart(grouped,"#barChart");
+    drawBarchart(user1,"#barChart");
+    drawConMap( data, "#conMap");
 
 });
 
@@ -151,6 +160,8 @@ function drawConMap(data, selector){
 
         return d;
     });
+    console.log(data.inner);
+    console.log(data.outer);
 
     // create  links data, including source nodes, target nodes and their positions
     let links = [];
@@ -167,7 +178,7 @@ function drawConMap(data, selector){
         // links.push(d.links);
         return links
     });
-    console.log(links);
+    // console.log(links);
 
     // Create the mapping of target nodes and their positions
     let targetPos = [];
@@ -175,7 +186,7 @@ function drawConMap(data, selector){
         targetPos.push({"targetX": d.x, "targetY": d.y, "target": d.node })
         return targetPos
     });
-    console.log(targetPos);
+    // console.log(targetPos);
 
     // Join target positions with links data by target nodes
     links.forEach(d=>{
@@ -187,6 +198,7 @@ function drawConMap(data, selector){
         }))
     })
     console.log(links);
+
 
     // Global variable used in mouseover and mouseout functions
     // linkData = links;
@@ -274,24 +286,8 @@ function drawConMap(data, selector){
         .attr('text-anchor', 'middle')
         .attr("transform", "translate(" + config.rect_width/2 + ", " + config.rect_height * .75 + ")")
         .text(d=>d.node);
-
-
-
-
-
-
-
-
 }
 
-
-// function get_color(name)
-// {   let c = Math.round(color(name));
-//     if (isNaN(c))
-//         return '#dddddd';	// fallback color
-//
-//     return colors[c];
-// }
 
 let nest = function (seq, keys) {
     if (!keys.length)
@@ -302,14 +298,6 @@ let nest = function (seq, keys) {
         return nest(value, rest)
     });
 };
-
-// let diagonal = function link(d) {
-//     return "M" + d.sourceY + "," + d.sourceX
-//         + "C" + (d.sourceY + d.targetY) / 2 + "," + d.sourceX
-//         + " " + (d.sourceY + d.targetY) / 2 + "," + d.targetX
-//         + " " + d.targetY + "," + d.targetX;
-// }
-
 
 
 function projectX(x)
