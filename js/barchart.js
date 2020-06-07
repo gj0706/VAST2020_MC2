@@ -21,6 +21,10 @@ function drawBarchart(data, selector){
     for(let i = 0;i < data.length;i++){
         drawSingleChart(data.filter(d=>d.imageId === `1_${i+1}`), selector)
     }
+    for(let i = 0;i < data.length;i++){
+        appendImages(data.filter(d=>d.imageId === `1_${i+1}`), selector)
+    }
+
 
 
     //
@@ -74,7 +78,7 @@ function drawBarchart(data, selector){
 function drawSingleChart(data, selector){
     let newData = data[0].objects;
     let margin = {top: 20, right: 20, bottom: 30, left: 30},
-        width = 600 - margin.left - margin.right,
+        width = 400 - margin.left - margin.right,
         height = 200 - margin.top - margin.bottom;
     let x = d3.scaleBand()
         .rangeRound([0, width], 0.1)
@@ -93,11 +97,12 @@ function drawSingleChart(data, selector){
 
     let y = d3.scaleLinear()
         .rangeRound([height, 0])
-        .domain([0, 1]);
+        .domain([0, d3.max(newData, d=>d.info.Score)])
+        // .ticks(4);
     // let colors = d3.schemeSet3();
 
     let xAxis = d3.axisBottom(x);
-    let yAxis = d3.axisLeft(y);
+    let yAxis = d3.axisLeft(y).ticks(4);
 
 
 
@@ -111,9 +116,9 @@ function drawSingleChart(data, selector){
     //
     // let yAxis = d3.axisLeft().scale(y);
 
-    const color = d3.scaleOrdinal(d3.schemeCategory10);
+    const color = d3.scaleOrdinal(d3.schemeSet3);
 
-    let svg = d3.select(selector).append("svg")
+    let svg = d3.select(selector).append("div").append("svg")
         .attr("width", width + margin.left + margin.right)
         .attr("height", height + margin.top + margin.bottom)
         .append("g")
@@ -144,14 +149,12 @@ function drawSingleChart(data, selector){
         // .style('font-weight','bold')
         // .text(d=>d.imageId);
 
-
-
     // svg.select('.y').transition().duration(500).delay(1300).style('opacity','1');
 
     svg.selectAll(".bar")
         .data(newData)
         .enter().append("rect")
-        .attr("class", "bars")
+        // .attr("class", "bars")
         .attr("x", d=>x(d.label))
         .attr("y", d=>y(d.info.Score))
         .attr("width", x.bandwidth())
