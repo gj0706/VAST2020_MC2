@@ -3,117 +3,26 @@
 
 
 function drawBarchart(data, selector){
-    let margin = {top: 20, right: 20, bottom: 30, left: 30},
-        width = 1800 - margin.left - margin.right,
-        height = 300 - margin.top - margin.bottom;
+
+    // let grouped = _.values(nest(data, ['PersonId', "ImageId"]));
+    let objectNames = _.uniq(_.flatten(_.map(data, d=>_.map(d.objects, v=>v.label))));
     let barPadding = 120;
-    let userData = _.filter(data.inner, d=>d.node === user)[0];
-    // Get unique object names
-    let objects = userData.relatedNodes.filter(d=>d !== "info" && d !== user);
-    // let images = userData[0].
-
-    // Get unique image ids
-    let imageIds =_.uniq( _.flatten(_.map(userData, d=>_.map(d, v=>v.ImageId)))).filter(d=>d !== undefined );
-    // let newData = [];
-    // _.each(userData, d=>{
-    //     newData.push( _.map(objects, o=> {return {"key": o, "values": _.values(d) }}))
+    // let userData = _.filter(data.inner, d=>d.node === user)[0];
+    // // Get unique object names
+    // let objects = userData.relatedNodes.filter(d=>d !== "info" && d !== user);
     //
-    // })
-    // console.log(newData);
-    let groupData = _.map(Object.entries(userData), d=>{
-        return{"objects": d[0], "images": _.map(d[1], v=>{return { "imageId":v["ImageId"], "score": v["Score"]  }})}});
-    console.log(groupData);
-
-    // Create a dummy scale to dynamically get the bar width
-    // dummy array
-    // let rangeBands = [];
-    // // cummulative value to position our bars
-    // let cummulative = 0;
-    // userData.info.forEach(function(d, i) {
-    //     if ([user, "info", "links", "node", "relatedLinks", "relatedNodes"].includes(d) === false ){
-    //         d.cummulative = cummulative;
-    //         cummulative += d.length;
-    //         _.forEach(d, function(values) {
-    //             rangeBands.push(i);
-    //         })
-    //     }
-    // });
-    // console.log(rangeBands);
-// set scale to cover whole svg
-
-    let x0 = d3.scaleBand()
-        .rangeRound([0, width], 0.1)
-        .domain(objects);
-
-    let x1 = d3.scaleBand()
-            .padding(0.05)
-            .domain(imageIds)
-            .rangeRound([0, x0.bandwidth()])
-
-    // let x1 = d3.scaleLinear()
-    //     .range([0, width])
-    //     .paddingInner(0.1)
-    //     .domain([0, xImages.rangeBand() * rangeBands.length]);
-
-    let y = d3.scaleLinear()
-        .rangeRound([height, 0])
-        .domain([0, 1]);
-    // let colors = d3.schemeSet3();
-
-    let xAxis = d3.axisBottom(x0);
-    let yAxis = d3.axisLeft(y);
-
-
-
-    // let x0  = d3.scaleBand().rangeRound([0, width], .5);
-    // let x1  = d3.scaleBand();
-    // let y   = d3.scaleLinear().rangeRound([height, 0]);
+    // // Get unique image ids
+    // let imageIds =_.uniq( _.flatten(_.map(userData, d=>_.map(d, v=>v.ImageId)))).filter(d=>d !== undefined );
     //
-    // let xAxis = d3.axisBottom().scale(x0)
-    //     .tickFormat(d3.timeFormat("Week %V"))
-    //     .tickValues(users);
-    //
-    // let yAxis = d3.axisLeft().scale(y);
+    // let groupData = _.map(Object.entries(userData), d=>{
+    //     return{"objects": d[0], "images": _.map(d[1], v=>{return { "imageId":v["ImageId"], "score": v["Score"]  }})}});
+    // console.log(groupData);
 
-    const color = d3.scaleOrdinal(d3.schemeCategory10);
-
-    let svg = d3.select(selector).append("svg")
-        .attr("width", width + margin.left + margin.right)
-        .attr("height", height + margin.top + margin.bottom)
-        .append("g")
-        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+    for(let i = 0;i < data.length;i++){
+        drawSingleChart(data.filter(d=>d.imageId === `1_${i+1}`), selector)
+    }
 
 
-    svg.append("g")
-        .attr("class", "x axis")
-        .attr("transform", "translate(0," + height + ")")
-        .call(xAxis);
-
-
-    svg.append("g")
-        .attr("class", "y axis")
-        // .style('opacity','0')
-        .call(yAxis)
-        .append("text")
-        .attr("transform", "rotate(-90)")
-        .attr("y", 6)
-        .attr("dy", ".71em")
-        .style("text-anchor", "end")
-        .style('font-weight','bold')
-        .text("Score");
-
-
-
-
-
-
-    // svg.select('.y').transition().duration(500).delay(1300).style('opacity','1');
-
-    let slice = svg.selectAll(".slice")
-        .data(userData)
-        .enter().append("g")
-        .attr("class", "g")
-        .attr("transform",function(d) { return "translate(" + xObject(d) + ",0)"; });
     //
     // slice.selectAll("rect")
     //     .data(function(d) { return d.values; })
@@ -162,3 +71,91 @@ function drawBarchart(data, selector){
     // legend.transition().duration(500).delay(function(d,i){ return 1300 + 100 * i; }).style("opacity","1");
 }
 
+function drawSingleChart(data, selector){
+    let newData = data[0].objects;
+    let margin = {top: 20, right: 20, bottom: 30, left: 30},
+        width = 600 - margin.left - margin.right,
+        height = 200 - margin.top - margin.bottom;
+    let x = d3.scaleBand()
+        .rangeRound([0, width], 0.1)
+        .padding(0.4)
+        .domain(_.map(newData, d=>d.label));
+
+    // let x1 = d3.scaleBand()
+    //         .padding(0.05)
+    //         .domain(imageIds)
+    //         .rangeRound([0, x0.bandwidth()])
+
+    // let x1 = d3.scaleLinear()
+    //     .range([0, width])
+    //     .paddingInner(0.1)
+    //     .domain([0, xImages.rangeBand() * rangeBands.length]);
+
+    let y = d3.scaleLinear()
+        .rangeRound([height, 0])
+        .domain([0, 1]);
+    // let colors = d3.schemeSet3();
+
+    let xAxis = d3.axisBottom(x);
+    let yAxis = d3.axisLeft(y);
+
+
+
+    // let x0  = d3.scaleBand().rangeRound([0, width], .5);
+    // let x1  = d3.scaleBand();
+    // let y   = d3.scaleLinear().rangeRound([height, 0]);
+    //
+    // let xAxis = d3.axisBottom().scale(x0)
+    //     .tickFormat(d3.timeFormat("Week %V"))
+    //     .tickValues(users);
+    //
+    // let yAxis = d3.axisLeft().scale(y);
+
+    const color = d3.scaleOrdinal(d3.schemeCategory10);
+
+    let svg = d3.select(selector).append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+        .append("g")
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+
+    svg.append("g")
+        .attr("class", "x axis")
+        .attr("transform", "translate(0," + height + ")")
+        .call(xAxis)
+        // .append("text", d=>_.map(d.objects, v=>v.label))
+        // .append("text")
+        // .text(d=>d.label)
+        // .attr("y", 0)
+        // .attr("x", 9)
+        // .attr("transform", "rotate(45)");
+
+
+    svg.append("g")
+        .attr("class", "y axis")
+        // .style('opacity','0')
+        .call(yAxis)
+        // .append("text")
+        // .attr("transform", "rotate(-90)")
+        // .attr("y", 6)
+        // .attr("dy", ".71em")
+        // .style("text-anchor", "end")
+        // .style('font-weight','bold')
+        // .text(d=>d.imageId);
+
+
+
+    // svg.select('.y').transition().duration(500).delay(1300).style('opacity','1');
+
+    svg.selectAll(".bar")
+        .data(newData)
+        .enter().append("rect")
+        .attr("class", "bars")
+        .attr("x", d=>x(d.label))
+        .attr("y", d=>y(d.info.Score))
+        .attr("width", x.bandwidth())
+        .attr("height", d=>height - y(d.info.Score))
+        .attr("fill", d=>color(d.info.Score));
+    // .attr("transform",function(d) { return "translate(" + xObject(d) + ",0)"; });
+}
