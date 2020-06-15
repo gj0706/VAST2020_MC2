@@ -4,6 +4,7 @@ d3.selection.prototype.moveToFront = function() {
     });
 };
 
+
 const labels = ['birdCall',
     'blueSunglasses',
     'canadaPencil',
@@ -68,7 +69,7 @@ d3.json('data/data.json').then(function(data){
     let outerNode = nest(data, ['Label', 'PersonId']);
     let grouped = _.values(nest(data, ['PersonId', "ImageId"]));
     let nested = _.map(grouped, (d,i)=>{return {"user": `user-${i+1}`, "images": _.map(_.keys(d), v=>{return {"imageId": v, "objects": _.map(d[v], o=>{return {"label": o.Label, "info": o}})}}) }})
-
+// debugger
 
 
 
@@ -118,7 +119,68 @@ d3.json('data/data.json').then(function(data){
     // Test
     let user1 = nested.filter(d=>d.user === "user-1")[0].images;
     // drawBarchart(grouped,"#barChart");
+
+    // let userData = [];
+    // for(let i = 1; i < 41; i++){
+    //     userData.push(nested.filter(d=>d.user === `user-${i.toString()}`)[0].images)
+    //     let selectedUser = d3.sellct(`#item-${i}`)
+    // }
+
+    // let initial = d3.select("#dropDown").on("change", updateBarchart());
+    // debugger
+
+    // Create drop down menu for each user
+    let users = [];
+    for(let i=1; i<41; i++){
+        users.push(`user-${i}`);
+    }
+
+
+     let dropDownChange = function(){
+        let selected = d3.select(this).property("value");
+        let newData = _.filter(nested, d=>d.user === selected)[0].images;
+        drawBarchart(newData, "#barChart");
+     }
+
+    let selection = d3.select("#selection")
+        .insert("select", "svg")
+        .on("change", dropDownChange)
+    //
+    //
+    selection.selectAll("option")
+        .data(users)
+        .enter().append("option")
+        .attr("value", d=>d)
+        // .attr("value", d=>d)
+        .text(d=>d);
+    //     .on("change", function(){
+    //         let selected = d3.select(this).property("id");
+    //         let newData = _.filter(nested, d=>d.user === selected)[0].images;
+    //         drawBarchart(newData,"#barChart");
+    //     });
+
+    // let initialUser = "user-1";
+
+    // let selection = d3.select("#dropDown").selectAll("option")
+    //     .data(nested)
+    //     .join("option")
+    //     .attr("id", d=>d.user)
+    //     .text(d=>d.user)
+    //     .on("change", function(d){
+    //         console.log(d);
+    //     })
+
+
     drawBarchart(user1,"#barChart");
+
+
+    // for(let i = 0; i < user1.length; i++){
+    //     appendImages(user1, )
+    // }
+    for(let i = 0; i < user1.length; i++){
+        appendImages(user1[i].imageId, "#images");
+    }
+    // appendImages(``, "#images")
     drawConMap( data, "#conMap");
 
 });
@@ -342,3 +404,11 @@ function showLargeImage(thumbnail) {
     document.querySelector("button").style.visibility = "visible";
     document.querySelector("#cover").style.visibility = "visible";
 }
+//
+// let  dropDownChange = function(data){
+//     let selected= d3.select(this).property("id");
+//
+//     let newData= _.filter(data, d=>d.user === selected)[0].images;
+//
+//     drawBarchart(newData,"#barChart");
+// }

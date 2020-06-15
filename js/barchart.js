@@ -5,8 +5,8 @@
 function drawBarchart(data, selector){
 
     // let grouped = _.values(nest(data, ['PersonId', "ImageId"]));
-    let objectNames = _.uniq(_.flatten(_.map(data, d=>_.map(d.objects, v=>v.label))));
-    let barPadding = 120;
+    // let objectNames = _.uniq(_.flatten(_.map(data, d=>_.map(d.objects, v=>v.label))));
+    // let barPadding = 120;
     // let userData = _.filter(data.inner, d=>d.node === user)[0];
     // // Get unique object names
     // let objects = userData.relatedNodes.filter(d=>d !== "info" && d !== user);
@@ -17,13 +17,16 @@ function drawBarchart(data, selector){
     // let groupData = _.map(Object.entries(userData), d=>{
     //     return{"objects": d[0], "images": _.map(d[1], v=>{return { "imageId":v["ImageId"], "score": v["Score"]  }})}});
     // console.log(groupData);
+    // let selectedId = d3.select(this).property("id");
+    // let selectedData = data.filter(d=>d.user === selectedId)[0].images;
 
+    // debugger
     for(let i = 0;i < data.length;i++){
-        drawSingleChart(data.filter(d=>d.imageId === `1_${i+1}`), selector)
+        // drawSingleChart(_.filter(data, d=>d.imageId === `1_${i+1}`), selector);
+        drawSingleChart(data[i], selector)
+
     }
-    for(let i = 0;i < data.length;i++){
-        appendImages(data.filter(d=>d.imageId === `1_${i+1}`), selector)
-    }
+
 
 
 
@@ -76,9 +79,12 @@ function drawBarchart(data, selector){
 }
 
 function drawSingleChart(data, selector){
-    let newData = data[0].objects;
+    // d3.select("#barChart").selectAll("*").remove();
+    // let newData = data[0].objects;
+    let newData = data.objects;
+
     let margin = {top: 20, right: 20, bottom: 30, left: 30},
-        width = 400 - margin.left - margin.right,
+        width = 450 - margin.left - margin.right,
         height = 200 - margin.top - margin.bottom;
     let x = d3.scaleBand()
         .rangeRound([0, width], 0.1)
@@ -97,7 +103,7 @@ function drawSingleChart(data, selector){
 
     let y = d3.scaleLinear()
         .rangeRound([height, 0])
-        .domain([0, d3.max(newData, d=>d.info.Score)])
+        .domain([0, d3.max(newData, d=>d.info.Score)]);
         // .ticks(4);
     // let colors = d3.schemeSet3();
 
@@ -153,7 +159,12 @@ function drawSingleChart(data, selector){
 
     svg.selectAll(".bar")
         .data(newData)
-        .enter().append("rect")
+        // .enter().append("rect")
+        .join(
+            function(enter){
+                return enter.append("rect")
+            }
+        )
         // .attr("class", "bars")
         .attr("x", d=>x(d.label))
         .attr("y", d=>y(d.info.Score))
@@ -161,4 +172,30 @@ function drawSingleChart(data, selector){
         .attr("height", d=>height - y(d.info.Score))
         .attr("fill", d=>color(d.info.Score));
     // .attr("transform",function(d) { return "translate(" + xObject(d) + ",0)"; });
+}
+
+function appendImages(imgId, selector){
+    let margin = {top: 20, right: 20, bottom: 30, left: 30},
+        width = 400 - margin.left - margin.right,
+        height = 200 - margin.top - margin.bottom;
+
+    let svg = d3.select(selector).append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+        .append("g")
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+
+    svg.selectAll("image")
+        .data(imgId).enter()
+        .append("svg:image")
+        // .attr("class", "images")
+        .attr("width", width )
+        .attr("height", height)
+        .attr("xlink:href", `MC2-Image-Data/Person1/Person${imgId}.jpg`)
+}
+
+function updateBarchart(data, userId){
+    let newData = data.filter(d=>d.user === userId)[0].images
+
 }
