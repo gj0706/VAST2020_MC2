@@ -3,6 +3,7 @@
 
 
 function drawBarchart(data, selector){
+    d3.select("#barChart").select("svg").remove();
 
     // let grouped = _.values(nest(data, ['PersonId', "ImageId"]));
     // let objectNames = _.uniq(_.flatten(_.map(data, d=>_.map(d.objects, v=>v.label))));
@@ -79,7 +80,6 @@ function drawBarchart(data, selector){
 }
 
 function drawSingleChart(data, selector){
-    // d3.select("#barChart").selectAll("*").remove();
     // let newData = data[0].objects;
     let newData = data.objects;
 
@@ -91,15 +91,6 @@ function drawSingleChart(data, selector){
         .padding(0.4)
         .domain(_.map(newData, d=>d.label));
 
-    // let x1 = d3.scaleBand()
-    //         .padding(0.05)
-    //         .domain(imageIds)
-    //         .rangeRound([0, x0.bandwidth()])
-
-    // let x1 = d3.scaleLinear()
-    //     .range([0, width])
-    //     .paddingInner(0.1)
-    //     .domain([0, xImages.rangeBand() * rangeBands.length]);
 
     let y = d3.scaleLinear()
         .rangeRound([height, 0])
@@ -109,18 +100,6 @@ function drawSingleChart(data, selector){
 
     let xAxis = d3.axisBottom(x);
     let yAxis = d3.axisLeft(y).ticks(4);
-
-
-
-    // let x0  = d3.scaleBand().rangeRound([0, width], .5);
-    // let x1  = d3.scaleBand();
-    // let y   = d3.scaleLinear().rangeRound([height, 0]);
-    //
-    // let xAxis = d3.axisBottom().scale(x0)
-    //     .tickFormat(d3.timeFormat("Week %V"))
-    //     .tickValues(users);
-    //
-    // let yAxis = d3.axisLeft().scale(y);
 
     const color = d3.scaleOrdinal(d3.schemeSet3);
 
@@ -135,46 +114,57 @@ function drawSingleChart(data, selector){
         .attr("class", "x axis")
         .attr("transform", "translate(0," + height + ")")
         .call(xAxis)
-        // .append("text", d=>_.map(d.objects, v=>v.label))
-        // .append("text")
-        // .text(d=>d.label)
-        // .attr("y", 0)
-        // .attr("x", 9)
-        // .attr("transform", "rotate(45)");
+        .append("text", d=>_.map(d.objects, v=>v.label))
+        .attr("y", 0)
+        .attr("x", 9)
+        .attr("transform", "rotate(45)");
 
 
     svg.append("g")
         .attr("class", "y axis")
         // .style('opacity','0')
         .call(yAxis)
-        // .append("text")
-        // .attr("transform", "rotate(-90)")
-        // .attr("y", 6)
-        // .attr("dy", ".71em")
-        // .style("text-anchor", "end")
-        // .style('font-weight','bold')
-        // .text(d=>d.imageId);
+        .append("text")
+        .attr("transform", "rotate(-90)")
+        .attr("y", 6)
+        .attr("dy", ".71em")
+        .style("text-anchor", "end")
+        .style('font-weight','bold')
+        .text("Score");
 
     // svg.select('.y').transition().duration(500).delay(1300).style('opacity','1');
-
+    const t = svg.transition().duration(200);
     svg.selectAll(".bar")
         .data(newData)
         // .enter().append("rect")
         .join(
-            function(enter){
-                return enter.append("rect")
-            }
+            enter=>enter.append("rect")
+                .attr("class", "bars")
+                .attr("x", d=>x(d.label))
+                .attr("y", d=>y(d.info.Score))
+                .attr("width", x.bandwidth())
+                .attr("height", d=>height - y(d.info.Score))
+                .attr("fill", d=>color(d.info.Score)),
+                // .call(enter=>enter.transition(t)),
+            update=>update.attr("x", d=>x(d.label))
+                .attr("class", "bars")
+                .attr("y", d=>y(d.info.Score))
+                .attr("width", x.bandwidth())
+                .attr("height", d=>height - y(d.info.Score))
+                .attr("fill", d=>color(d.info.Score))
+            // exit=>exit.transition(t)
+            //     .on("end", function(){
+            //     d3.selectAll(".bars").remove();
+            // })
+
         )
         // .attr("class", "bars")
-        .attr("x", d=>x(d.label))
-        .attr("y", d=>y(d.info.Score))
-        .attr("width", x.bandwidth())
-        .attr("height", d=>height - y(d.info.Score))
-        .attr("fill", d=>color(d.info.Score));
+        ;
     // .attr("transform",function(d) { return "translate(" + xObject(d) + ",0)"; });
 }
 
 function appendImages(imgId, selector){
+    // d3.select("#images").select("svg").remove();
     let margin = {top: 20, right: 20, bottom: 30, left: 30},
         width = 400 - margin.left - margin.right,
         height = 200 - margin.top - margin.bottom;
@@ -192,7 +182,7 @@ function appendImages(imgId, selector){
         // .attr("class", "images")
         .attr("width", width )
         .attr("height", height)
-        .attr("xlink:href", `MC2-Image-Data/Person1/Person${imgId}.jpg`)
+        .attr("xlink:href", `MC2-Image-Data/Person${imgId.split("_")[0]}/Person${imgId}.jpg`)
 }
 
 function updateBarchart(data, userId){
