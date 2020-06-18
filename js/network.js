@@ -111,23 +111,16 @@ d3.json('data/data.json').then(function(data){
         d["info"] = Object.values(d)
     });
 
-
-
+    // Data for concept map
     data = {"inner": innerNode, "outer": outerNode}
 
 
-    // Test
+    // Initialize bar charts
     let user1 = nested.filter(d=>d.user === "user-1")[0].images;
-    // drawBarchart(grouped,"#barChart");
-
-    // let userData = [];
-    // for(let i = 1; i < 41; i++){
-    //     userData.push(nested.filter(d=>d.user === `user-${i.toString()}`)[0].images)
-    //     let selectedUser = d3.sellct(`#item-${i}`)
-    // }
-
-    // let initial = d3.select("#dropDown").on("change", updateBarchart());
-    // debugger
+    drawBarchart(user1,"#barChart");
+    for(let i = 0; i < user1.length; i++){
+        appendImages(user1[i].imageId, "#images");
+    }
 
     // Create drop down menu for each user
     let users = [];
@@ -135,51 +128,35 @@ d3.json('data/data.json').then(function(data){
         users.push(`user-${i}`);
     }
 
-
-     let dropDownChange = function(){
+    // Function in response to dropdown event listener
+    let dropDownChange = function(){
         let selected = d3.select(this).property("value");
         let newData = _.filter(nested, d=>d.user === selected)[0].images;
         drawBarchart(newData, "#barChart");
+        d3.select("#images").select("svg").remove();
+
+        for(let i = 0; i < newData.length; i++){
+            appendImages(newData[i].imageId, "#images");
+        }
      }
 
+    // Create dropdown selections and add event listener
     let selection = d3.select("#selection")
         .insert("select", "svg")
         .on("change", dropDownChange)
-    //
-    //
+
     selection.selectAll("option")
         .data(users)
         .enter().append("option")
         .attr("value", d=>d)
-        // .attr("value", d=>d)
         .text(d=>d);
-    //     .on("change", function(){
-    //         let selected = d3.select(this).property("id");
-    //         let newData = _.filter(nested, d=>d.user === selected)[0].images;
-    //         drawBarchart(newData,"#barChart");
-    //     });
-
-    // let initialUser = "user-1";
-
-    // let selection = d3.select("#dropDown").selectAll("option")
-    //     .data(nested)
-    //     .join("option")
-    //     .attr("id", d=>d.user)
-    //     .text(d=>d.user)
-    //     .on("change", function(d){
-    //         console.log(d);
-    //     })
 
 
-    drawBarchart(user1,"#barChart");
 
 
     // for(let i = 0; i < user1.length; i++){
-    //     appendImages(user1, )
+    //     appendImages(user1[i].imageId, "#images");
     // }
-    for(let i = 0; i < user1.length; i++){
-        appendImages(user1[i].imageId, "#images");
-    }
     // appendImages(``, "#images")
     drawConMap( data, "#conMap");
 
