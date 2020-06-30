@@ -50,117 +50,118 @@ const config = {
 
 
 
-// let linkData;
-
-
 // Load the data
+d3.json("data/data.json").then(function(data){
+    d3.json("data/gt.json").then(function(gt) {
 
-d3.json('data/data.json').then(function(data){
-    console.log(data);
-    // let grouped = _.mapValues(_.groupBy(data, 'PersonId'), list => list.map(d=>_.omit(d, 'PersonId')));
-    // console.log(grouped);
-
-    // uses lodash `mapValues` and `groupBy` to recursively nest the data
-
-
-
-// nest data
-    let innerNode = _.values(nest(data, ['PersonId', 'Label']));
-    let outerNode = nest(data, ['Label', 'PersonId']);
-    let grouped = _.values(nest(data, ['PersonId', "ImageId"]));
-    let nested = _.map(grouped, (d,i)=>{return {"user": `user-${i+1}`, "images": _.map(_.keys(d), v=>{return {"imageId": v, "objects": _.map(d[v], o=>{return {"label": o.Label, "info": o}})}}) }})
-// debugger
-
-
-
-    console.log(innerNode);
-    // document.write(JSON.stringify(nested, null, 4));
-    // let arr = _.values(_.mapKeys(nested, function(value, key) { value.id = key; return value; }));
-    // console.log(arr);
-    // let n = _.values(innerNode.map((d, i)=>{return{"node": (i+1).toString(), "links": _.values(d)}}));
-    // console.log(n);
-
-    let links = [];
-    innerNode.forEach((d, i)=>{
-
-        d["node"] = `user-${(i+1).toString()}`;
-        d["links"] = _.keys(d).filter(d=>d !== "node").map((v)=>{ return {"source": `user-${(i+1).toString()}`, "target": v, "width": d[v].length }});
-        d["info"] = Object.values(d)
-        links.push(_.keys(d).filter(d=>d !== "node").map((v)=>{ return {"source": `user-${(i+1).toString()}`, "target": v, "width": d[v].length }}));
-        d["relatedNodes"] = _.keys(d).filter(v=>(v !== "node") && (v !== "links"));
-        d["relatedNodes"].push(d["node"]);
-        d["relatedLinks"] = d["relatedNodes"].map(v=>d["node"] + "-" + v);
-    });
+        // nest data
+        let innerNode = _.values(nest(data, ['PersonId', 'Label']));
+        let outerNode = nest(data, ['Label', 'PersonId']);
+        let grouped = _.values(nest(data, ['PersonId', "ImageId"]));
+        let nested = _.map(grouped, (d, i) => {
+            return {
+                "user": `user-${i + 1}`, "images": _.map(_.keys(d), v => {
+                    return {
+                        "imageId": v, "objects": _.map(d[v], o => {
+                            return {"label": o.Label, "info": o}
+                        })
+                    }
+                })
+            }
+        })
 
 
-    // let l = _.values(innerNode.map((d, i)=>{return{"node": (i+1).toString(), "links": d}}));
-    // Transform data for outer nodes
-    outerNode = _.map(outerNode, (obj, key)=>{
-        obj.node = key;
-        return obj
-    });
+        // Extract ground truth data
+        // let gtData = nest(gt, ["External ID"]);
+        console.log(gt);
+        // _.map(gt, d=>{return {"user": d["External ID"].split(".")[0].slice(6).split("_")[0], "imageId": d["External ID"].split(".")[0].slice(6), "objects": d.Label.objects}})
+        let groupedGt = _.map(gt, d=>{return {"user": d["External ID"].split(".")[0].slice(6).split("_")[0], "imageId": d["External ID"].split(".")[0].slice(6), "objects": _.map(d.Label.objects, v=>{return {"name": v.title, "bbox": v.bbox}})}})
+        // let nestedGt = _.values(nest(groupedGt, ["user", "imageId"]));
+        console.log(groupedGt);
+        // console.log(innerNode);
+        // document.write(JSON.stringify(nested, null, 4));
+        // let arr = _.values(_.mapKeys(nested, function(value, key) { value.id = key; return value; }));
+        // console.log(arr);
+        // let n = _.values(innerNode.map((d, i)=>{return{"node": (i+1).toString(), "links": _.values(d)}}));
+        // console.log(n);
+
+        let links = [];
+        innerNode.forEach((d, i) => {
+
+            d["node"] = `user-${(i + 1).toString()}`;
+            d["links"] = _.keys(d).filter(d => d !== "node").map((v) => {
+                return {"source": `user-${(i + 1).toString()}`, "target": v, "width": d[v].length}
+            });
+            d["info"] = Object.values(d)
+            links.push(_.keys(d).filter(d => d !== "node").map((v) => {
+                return {"source": `user-${(i + 1).toString()}`, "target": v, "width": d[v].length}
+            }));
+            d["relatedNodes"] = _.keys(d).filter(v => (v !== "node") && (v !== "links"));
+            d["relatedNodes"].push(d["node"]);
+            d["relatedLinks"] = d["relatedNodes"].map(v => d["node"] + "-" + v);
+        });
 
 
-    // let final = _.map(_.map(_.values(innerNode.map((d, i)=>{return{"node": (i+1).toString(), "links": d}})), d=>d.links), d=>{return{"target": _.keys(d), "info": _.values(d)}})
+        // Transform data for outer nodes
+        outerNode = _.map(outerNode, (obj, key) => {
+            obj.node = key;
+            return obj
+        });
 
-    outerNode.forEach((d)=>{
-        // d["node"] = d["Label"],
-        d["links"] = _.keys(d).filter(d=>(d !== "node") && (d !== "links")).map((v,i)=>{ return {"source": d.node, "target": `user-${v}`, "width": d[v].length}});
-        d["relatedNodes"] = _.keys(d).filter(d=>(d !== "node") && (d !== "links")).map(v=>`user-${v}`);
-        d["relatedLinks"] = d["relatedNodes"].filter(d=>(d !== "node") && (d !== "links")).map(v=>`${v}-${d["node"]}`);
-        d["info"] = Object.values(d)
-    });
+        outerNode.forEach((d) => {
+            // d["node"] = d["Label"],
+            d["links"] = _.keys(d).filter(d => (d !== "node") && (d !== "links")).map((v, i) => {
+                return {"source": d.node, "target": `user-${v}`, "width": d[v].length}
+            });
+            d["relatedNodes"] = _.keys(d).filter(d => (d !== "node") && (d !== "links")).map(v => `user-${v}`);
+            d["relatedLinks"] = d["relatedNodes"].filter(d => (d !== "node") && (d !== "links")).map(v => `${v}-${d["node"]}`);
+            d["info"] = Object.values(d)
+        });
 
-    // Data for concept map
-    data = {"inner": innerNode, "outer": outerNode}
+        // Data for concept map
+        data = {"inner": innerNode, "outer": outerNode}
 
-
-    // Initialize bar charts
-    let user1 = nested.filter(d=>d.user === "user-1")[0].images;
-    drawBarchart(user1,"#barChart");
-    for(let i = 0; i < user1.length; i++){
-        appendImages(user1[i].imageId, "#images");
-    }
-
-    // Create drop down menu for each user
-    let users = [];
-    for(let i=1; i<41; i++){
-        users.push(`user-${i}`);
-    }
-
-    // Function in response to dropdown event listener
-    let dropDownChange = function(){
-        let selected = d3.select(this).property("value");
-        let newData = _.filter(nested, d=>d.user === selected)[0].images;
-        drawBarchart(newData, "#barChart");
-        d3.select("#images").select("svg").remove();
-
-        for(let i = 0; i < newData.length; i++){
-            appendImages(newData[i].imageId, "#images");
+        // Initialize bar charts
+        let user1 = nested.filter(d => d.user === "user-1")[0].images;
+        drawBarchart(user1, "#barChart");
+        for (let i = 0; i < user1.length; i++) {
+            appendImages(user1[i], "#images");
         }
-     }
 
-    // Create dropdown selections and add event listener
-    let selection = d3.select("#selection")
-        .insert("select", "svg")
-        .on("change", dropDownChange)
+        // Create drop down menu for each user
+        let users = [];
+        for (let i = 1; i < 41; i++) {
+            users.push(`user-${i}`);
+        }
 
-    selection.selectAll("option")
-        .data(users)
-        .enter().append("option")
-        .attr("value", d=>d)
-        .text(d=>d);
+        // Function in response to dropdown event listener
+        let dropDownChange = function () {
+            let selected = d3.select(this).property("value");
+            let newData = _.filter(nested, d => d.user === selected)[0].images;
+            d3.select("#barChart").selectAll("svg").remove();
 
+            drawBarchart(newData, "#barChart");
+            d3.select("#images").selectAll("svg").remove();
 
+            for (let i = 0; i < newData.length; i++) {
+                appendImages(newData[i], "#images");
+            }
+        }
 
+        // Create dropdown selections and add event listener
+        let selection = d3.select("#selection")
+            .insert("select", "svg")
+            .on("change", dropDownChange)
+        selection.selectAll("option")
+            .data(users)
+            .enter().append("option")
+            .attr("value", d => d)
+            .text(d => d);
 
-    // for(let i = 0; i < user1.length; i++){
-    //     appendImages(user1[i].imageId, "#images");
-    // }
-    // appendImages(``, "#images")
-    drawConMap( data, "#conMap");
-
-});
+        // Draw network of users and items
+        drawConMap(data, "#conMap");
+    })
+})
 
 
 function drawConMap(data, selector){
@@ -236,12 +237,6 @@ function drawConMap(data, selector){
             }
         }))
     })
-    console.log(links);
-
-
-    // Global variable used in mouseover and mouseout functions
-    // linkData = links;
-
 
     // Define link layout
     let link = d3.linkHorizontal()
@@ -275,10 +270,6 @@ function drawConMap(data, selector){
     onode.append("circle")
         .attr('id', d=>d.node)
         .attr("r", 5);
-
-    // onode.append("circle")
-    //     .attr('r', 20)
-    //     .attr('visibility', 'hidden');
 
     onode.append("text")
         .attr('id', d=>d.node + '-txt')
@@ -318,8 +309,6 @@ function drawConMap(data, selector){
 
     d3.select(self.frameElement).style("height", config.diameter - 150 + "px");
 
-
-        // .attr("transform", d=>"translate(" +)
     inode.append("text")
         // .attr('id', d=>d.node)
         .attr('text-anchor', 'middle')
@@ -345,7 +334,6 @@ function projectX(x)
 }
 
 function mouseover(d){
-
     // Bring to front
     d3.selectAll('.links .link').sort(function(a, b){ return d.relatedLinks.indexOf(a.node); });
 
@@ -361,8 +349,8 @@ function mouseover(d){
     }
 }
 
-function mouseout(d){
 
+function mouseout(d){
     for (let i = 0; i < d.relatedNodes.length; i++)
     {
         d3.select(`#${d.relatedNodes[i]}`).classed('highlight', false);
@@ -375,17 +363,10 @@ function mouseout(d){
     }
 }
 
+
 function showLargeImage(thumbnail) {
     document.getElementById('wup').src = thumbnail.src
     document.querySelector("#wup").style.visibility = "visible";
     document.querySelector("button").style.visibility = "visible";
     document.querySelector("#cover").style.visibility = "visible";
 }
-//
-// let  dropDownChange = function(data){
-//     let selected= d3.select(this).property("id");
-//
-//     let newData= _.filter(data, d=>d.user === selected)[0].images;
-//
-//     drawBarchart(newData,"#barChart");
-// }
