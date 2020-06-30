@@ -25,6 +25,13 @@ text {
 
 }
 
+.row-content {
+    margin: 0px auto;
+    padding: 50px 0px;
+    border-bottom: 1px ridge;
+    mid-height: 10px;
+}
+
 svg {
     font: 12px sans-serif;
 }
