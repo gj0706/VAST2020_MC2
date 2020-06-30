@@ -52,7 +52,7 @@ const config = {
 
 // Load the data
 d3.json("data/data.json").then(function(data){
-    d3.json("data/gt.json").then(function(gt) {
+    // d3.json("data/gt.json").then(function(gt) {
 
         // nest data
         let innerNode = _.values(nest(data, ['PersonId', 'Label']));
@@ -73,11 +73,11 @@ d3.json("data/data.json").then(function(data){
 
         // Extract ground truth data
         // let gtData = nest(gt, ["External ID"]);
-        console.log(gt);
+        // console.log(gt);
         // _.map(gt, d=>{return {"user": d["External ID"].split(".")[0].slice(6).split("_")[0], "imageId": d["External ID"].split(".")[0].slice(6), "objects": d.Label.objects}})
-        let groupedGt = _.map(gt, d=>{return {"user": d["External ID"].split(".")[0].slice(6).split("_")[0], "imageId": d["External ID"].split(".")[0].slice(6), "objects": _.map(d.Label.objects, v=>{return {"name": v.title, "bbox": v.bbox}})}})
+        // let groupedGt = _.map(gt, d=>{return {"user": d["External ID"].split(".")[0].slice(6).split("_")[0], "imageId": d["External ID"].split(".")[0].slice(6), "objects": _.map(d.Label.objects, v=>{return {"name": v.title, "bbox": v.bbox}})}})
         // let nestedGt = _.values(nest(groupedGt, ["user", "imageId"]));
-        console.log(groupedGt);
+        // console.log(groupedGt);
         // console.log(innerNode);
         // document.write(JSON.stringify(nested, null, 4));
         // let arr = _.values(_.mapKeys(nested, function(value, key) { value.id = key; return value; }));
@@ -160,7 +160,7 @@ d3.json("data/data.json").then(function(data){
 
         // Draw network of users and items
         drawConMap(data, "#conMap");
-    })
+    // })
 })
 
 
