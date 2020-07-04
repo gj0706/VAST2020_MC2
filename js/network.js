@@ -53,6 +53,9 @@ const config = {
 // Load the data
 d3.json("data/data.json").then(function(data){
     // d3.json("data/gt.json").then(function(gt) {
+    d3.json("data/pca.json").then(function(pcaData){
+
+
 
         // nest data
         let innerNode = _.values(nest(data, ['PersonId', 'Label']));
@@ -69,7 +72,7 @@ d3.json("data/data.json").then(function(data){
                 })
             }
         })
-
+        console.log(nested);
 
         // Extract ground truth data
         // let gtData = nest(gt, ["External ID"]);
@@ -161,6 +164,10 @@ d3.json("data/data.json").then(function(data){
         // Draw network of users and items
         drawConMap(data, "#conMap");
     // })
+
+        drawPCA(pcaData, "#pca");
+
+    })
 })
 
 
