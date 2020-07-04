@@ -26,14 +26,27 @@ function drawPCA(data, selector){
             .range([ 0, width ]);
         svg.append("g")
             .attr("transform", "translate(0," + height + ")")
-            .call(d3.axisBottom(x));
+            .call(d3.axisBottom(x))
+            .append("text")
+            .text("Principle component 1");
 
         // Add Y axis
         let y = d3.scaleLinear()
             .domain(d3.extent(data, d => d.PC2)).nice()
             .range([ height, 0]);
         svg.append("g")
-            .call(d3.axisLeft(y));
+            .call(d3.axisLeft(y))
+
+
+        svg.append("text")
+            .attr("x", 10)
+            .attr("y", 10)
+            .text("PC1");
+        svg.append("text")
+            .attr("x", width)
+            .attr("y", height-10)
+            .attr("text-anchor", "end")
+            .text("PC2")
 
         // Add dots
         svg.append('g')
