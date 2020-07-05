@@ -25,7 +25,8 @@ function drawPCA(data, selector){
         .attr("class", "d3-tip")
         .html(d=>"ImageId: " + d.ImageId + "<br>" +
         "PC1 value: " + d.PC1 + "<br>" +
-        "PC2 value: " + d.PC2);
+        "PC2 value: " + d.PC2 +  "<br>" +
+            "<img src= " + `data/images/Person${d.ImageId}.jpg` + "  />" );
 
     svg.call(tip);
 
@@ -67,6 +68,13 @@ function drawPCA(data, selector){
             .attr("cy", function (d) { return y(d.PC2); } )
             .attr("r", 3)
             .style("fill", d=>colorScale(d.PersonId))
+            // .on("mouseover", function(d){
+            //     let path = `data/images/Person${d.ImageId}.jpg`;
+            //     let string =  "<img src= " + path + "  />";
+            //     // d3.select("this").attr("xlink:href", `data/images/Person${d.ImageId}.jpg`);
+            //     tip.show(d);
+            //     tip.html(string);
+            // })
             .on("mouseover", tip.show)
             .on("mouseout", tip.hide);
 

@@ -97,7 +97,9 @@ function appendImages(data, selector){
         .attr("id", d=>d.imgId)
         .attr("width", width )
         .attr("height", height)
-        .attr("xlink:href", `MC2-Image-Data/Person${imgId.split("_")[0]}/Person${imgId}.jpg`)
+        // .attr("xlink:href", `MC2-Image-Data/Person${imgId.split("_")[0]}/Person${imgId}.jpg`)
+        .attr("xlink:href", `data/images/Person${imgId}.jpg`)
+
 
     svg.selectAll("rect")
         .append("g")
