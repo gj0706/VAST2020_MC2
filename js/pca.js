@@ -68,13 +68,6 @@ function drawPCA(data, selector){
             .attr("cy", function (d) { return y(d.PC2); } )
             .attr("r", 3)
             .style("fill", d=>colorScale(d.PersonId))
-            // .on("mouseover", function(d){
-            //     let path = `data/images/Person${d.ImageId}.jpg`;
-            //     let string =  "<img src= " + path + "  />";
-            //     // d3.select("this").attr("xlink:href", `data/images/Person${d.ImageId}.jpg`);
-            //     tip.show(d);
-            //     tip.html(string);
-            // })
             .on("mouseover", tip.show)
             .on("mouseout", tip.hide);
 

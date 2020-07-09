@@ -9,7 +9,7 @@ function drawBarchart(data, selector){
 function drawSingleChart(data, selector){
     // let newData = data[0].objects;
     let newData = data.objects;
-
+// debugger
     let margin = {top: 20, right: 20, bottom: 30, left: 30},
         width = 450 - margin.left - margin.right,
         height = 200 - margin.top - margin.bottom;
@@ -74,48 +74,14 @@ function drawSingleChart(data, selector){
         .attr("fill", d=>color(d.info.Score))
         .on("mouseover", tip.show)
         .on("mouseout", tip.hide);
+    //
+    svg.append("text")
+        .attr("x", width / 2)
+        .attr("y", 0 - (margin.top / 2))
+        .attr("text-anchor", "middle")
+        .style("font-size", "10px")
+        // .style("text-decoration", "underline")
+        .text(`ImageId: ${data.imageId}`);
 }
 
 
-function appendImages(data, selector){
-    let imgId = data.imageId;
-    // d3.select("#images").select("svg").remove();
-    let margin = {top: 0, right: 20, bottom: 20, left: 30},
-        width = 450 - margin.left - margin.right,
-        height = 200 - margin.top - margin.bottom;
-
-    let svg = d3.select(selector).append("svg")
-        .attr("width", width + margin.left + margin.right)
-        .attr("height", height + margin.top + margin.bottom)
-        .append("g")
-        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-    let images = svg.selectAll("image")
-        .data(imgId)
-        .join("image")
-        .attr("class", "images")
-        .attr("id", d=>d.imgId)
-        .attr("width", width )
-        .attr("height", height)
-        // .attr("xlink:href", `MC2-Image-Data/Person${imgId.split("_")[0]}/Person${imgId}.jpg`)
-        .attr("xlink:href", `data/images/Person${imgId}.jpg`)
-
-
-    svg.selectAll("rect")
-        .append("g")
-        .data(data.objects)
-        .join("rect")
-        .attr("class", "bboxes")
-        .attr("id", d=>d.imageId)
-        .attr("width", d=>d.info.Width/width)
-        .attr("height", d=>d.info.Height/height)
-        .attr("x", d=>d.info.x)
-        .attr("y", d=>d.info.y)
-        .attr("fill", "none")
-        .attr("stroke", "yellow")
-}
-
-
-// function appendBBox(data){
-//
-// }

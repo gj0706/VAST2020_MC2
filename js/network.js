@@ -38,14 +38,14 @@ const margin ={
 const config = {
     "width": 1000 - margin.left - margin.right,
     "height": 1000 - margin.top - margin.bottom,
-    "rect_width": 38,
+    "rect_width": 40,
     "rect_height": 14,
     "link_width": "5px",
-    "diameter": 960,
+    "diameter": 1200,
     // "colors": ["#a50026","#d73027","#f46d43","#fdae61","#fee090","#ffffbf","#e0f3f8","#abd9e9","#74add1","#4575b4","#313695"],
     "iLength": 40,
-    "oLength": 22,
-    "mid": 11
+    "oLength": 43,
+    "mid": 23
 }
 
 
@@ -142,7 +142,7 @@ function drawConMap(data, selector){
         .attr("id", d=>`${d.source}-${d.target}`)
         .attr("fill", "none")
         .attr("stroke", "#457b9d")
-        .attr("stroke-width", d=>d.width)
+        .attr("stroke-width", d=>d.width/3)
         // .attr("d", d=>diagonal(d))
         .attr("d", link);
 
