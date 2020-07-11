@@ -26,12 +26,12 @@ function appendImages(data, selector){
         .join("image")
         .attr("class", "images")
         .attr("id", imgId)
-        .attr("width", width )
-        .attr("height", height)
+        // .attr("width", width )
+        // .attr("height", height)
         // .attr("xlink:href", `MC2-Image-Data/Person${imgId.split("_")[0]}/Person${imgId}.jpg`)
         .attr("xlink:href", `data/images/Person${imgId}.jpg`)
 
-        svg.append("text")
+    svg.append("text")
         .attr("x", margin.left/2)
         .attr("y", 10)
         .attr("text-anchor", "middle")
@@ -41,8 +41,8 @@ function appendImages(data, selector){
 
 
     svg.selectAll("rect")
-        // .append("g")
-        // .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+        .append("g")
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
         .data(data.objects)
         .join("rect")
         .attr("class", "bboxes")
