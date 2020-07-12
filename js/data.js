@@ -1,7 +1,7 @@
 // Load the data
 
 const dataArray = [
-    d3.json('data/new_data.json'),
+    d3.json('data/data.json'),
     d3.json('data/pca.json'),
     d3.json('data/gt.json'),
     d3.json('data/gt_pca.json'),
