@@ -8,7 +8,7 @@ function drawPCA(data, selector){
         height = 400 - margin.top - margin.bottom;
 
 // append the svg object to the body of the page
-    let svg = d3.select("#pca")
+    let svg = d3.select(selector)
         .append("svg")
         .attr("width", width + margin.left + margin.right)
         .attr("height", height + margin.top + margin.bottom)
@@ -71,7 +71,20 @@ function drawPCA(data, selector){
             .on("mouseover", tip.show)
             .on("mouseout", tip.hide);
 
-
+        // // Add title
+        // svg.append("text")
+        //     .attr("x", width / 2)
+        //     .attr("y", 0 - (margin.top / 2))
+        //     .attr("text-anchor", "middle")
+        //     .style("font-size", "10px")
+        //     // .style("text-decoration", "underline")
+        //     .text(function(){
+        //         if(selcetor == "pca"){
+        //             return "PCA"
+        //         }else{
+        //             return "Ground Truth PCA"
+        //         }
+        //     });
 
 
 

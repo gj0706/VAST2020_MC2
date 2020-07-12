@@ -3,15 +3,18 @@
 const dataArray = [
     d3.json('data/new_data.json'),
     d3.json('data/pca.json'),
-    d3.json('data/gt.json')];
+    d3.json('data/gt.json'),
+    d3.json('data/gt_pca.json'),
+];
 
 Promise.all(dataArray).then(function(allData){
     let data = allData[0];
     console.log(data);
     let pcaData = allData[1];
     let gtData = allData[2];
+    let gtPcaData = allData[3];
     // console.log(data);
-    console.log(gtData);
+    console.log(gtPcaData);
 
     // nest the data into hierarchical structure
     let innerNode = _.values(nest(gtData, ['PersonId', 'Label']));
@@ -125,6 +128,7 @@ Promise.all(dataArray).then(function(allData){
     // })
 
     drawPCA(pcaData, "#pca");
+    drawPCA(gtPcaData, "#gtPca")
 
 })
 
