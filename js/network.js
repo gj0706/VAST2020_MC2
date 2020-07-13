@@ -146,6 +146,7 @@ function drawConMap(data, selector){
         .attr("fill", "none")
         // .attr("stroke", "#457b9d")
         .attr("stroke-width", d=>d.width/4)
+        .style("opacity", d=>d.opacity)
         // .attr("d", d=>diagonal(d))
         .attr("d", link);
 

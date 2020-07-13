@@ -96,7 +96,8 @@ function nestData(data){
 
         d["node"] = `user-${(i + 1).toString()}`;
         d["links"] = _.keys(d).filter(d => d !== "node").map((v) => {
-            return {"source": `user-${(i + 1).toString()}`, "target": v, "width": d[v].length}
+            return {"source": `user-${(i + 1).toString()}`, "target": v, "width": d[v].length,
+                "opacity":_.sum( _.map(d[v],o=>o.Score))/d[v].length}
         });
         d["info"] = Object.values(d)
         links.push(_.keys(d).filter(d => d !== "node").map((v) => {
