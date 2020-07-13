@@ -8,18 +8,16 @@ const dataArray = [
 ];
 
 Promise.all(dataArray).then(function(allData){
-    let data = allData[0];
-    console.log(data);
+    // let data = allData[0];
+    // console.log(data);
     let pcaData = allData[1];
-    let gtData = allData[2];
+    // let gtData = allData[2];
     let gtPcaData = allData[3];
     // console.log(data);
     console.log(gtPcaData);
 
-    // nest the data into hierarchical structure
-    let innerNode = _.values(nest(gtData, ['PersonId', 'Label']));
-    let outerNode = nest(gtData, ['Label', 'PersonId']);
-    let grouped = _.values(nest(data, ['PersonId', "ImageId"]));
+
+    let grouped = _.values(nest(allData[0], ['PersonId', "ImageId"]));
     console.log(grouped);
     let nested = _.map(grouped, (d, i) => {
         return {
@@ -32,59 +30,12 @@ Promise.all(dataArray).then(function(allData){
             })
         }
     })
-    // console.log(nested);
 
-    // Extract ground truth data
-    // let gt = nest(gtData, ["External ID"]);
-    // console.log(gtData);
-    // _.map(gtData, d=>{return {"user": d["External ID"].split(".")[0].slice(6).split("_")[0], "imageId": d["External ID"].split(".")[0].slice(6), "objects": d.Label.objects}})
-    // let groupedGt = _.map(gt, d=>{return {"user": d["External ID"].split(".")[0].slice(6).split("_")[0], "imageId": d["External ID"].split(".")[0].slice(6), "objects": _.map(d.Label.objects, v=>{return {"name": v.title, "bbox": v.bbox}})}})
-    // let nestedGt = _.values(nest(groupedGt, ["user", "imageId"]));
-    // console.log(groupedGt);
-    // console.log(innerNode);
-    // // document.write(JSON.stringify(nested, null, 4));
-    // let arr = _.values(_.mapKeys(nested, function(value, key) { value.id = key; return value; }));
-    // console.log(arr);
-    // let n = _.values(innerNode.map((d, i)=>{return{"node": (i+1).toString(), "links": _.values(d)}}));
-    // console.log(n);
-    // let gt = _.map(gtData, d=>{return {"node": d["External ID"].split(".")[0].slice(6).split("_")[0], "imageId": d["External ID"].split(".")[0].slice(6), "objects": _.map(d.Label.objects, v=>{return {"bbox": v.bbox, "name": v.title}})}})
-    // let nestedGt = nest(gt, ["node"]);
+    let data = nestData(allData[0]);
+    let gtData = nestData(allData[2]);
+console.log(data);
+console.log(gtData);
 
-    let links = [];
-    innerNode.forEach((d, i) => {
-
-        d["node"] = `user-${(i + 1).toString()}`;
-        d["links"] = _.keys(d).filter(d => d !== "node").map((v) => {
-            return {"source": `user-${(i + 1).toString()}`, "target": v, "width": d[v].length}
-        });
-        d["info"] = Object.values(d)
-        links.push(_.keys(d).filter(d => d !== "node").map((v) => {
-            return {"source": `user-${(i + 1).toString()}`, "target": v, "width": d[v].length}
-        }));
-        d["relatedNodes"] = _.keys(d).filter(v => (v !== "node") && (v !== "links"));
-        d["relatedNodes"].push(d["node"]);
-        d["relatedLinks"] = d["relatedNodes"].map(v => d["node"] + "-" + v);
-    });
-
-
-    // Transform data for outer nodes
-    outerNode = _.map(outerNode, (obj, key) => {
-        obj.node = key;
-        return obj
-    });
-
-    outerNode.forEach((d) => {
-        // d["node"] = d["Label"],
-        d["links"] = _.keys(d).filter(d => (d !== "node") && (d !== "links")).map((v, i) => {
-            return {"source": d.node, "target": `user-${v}`, "width": d[v].length}
-        });
-        d["relatedNodes"] = _.keys(d).filter(d => (d !== "node") && (d !== "links")).map(v => `user-${v}`);
-        d["relatedLinks"] = d["relatedNodes"].filter(d => (d !== "node") && (d !== "links")).map(v => `${v}-${d["node"]}`);
-        d["info"] = Object.values(d)
-    });
-
-    // Data for concept map
-    gtData = {"inner": innerNode, "outer": outerNode}
 
     // Initialize bar charts
     let user1 = nested.filter(d => d.user === "user-1")[0].images;
@@ -123,21 +74,57 @@ Promise.all(dataArray).then(function(allData){
         .attr("value", d => d)
         .text(d => d);
 
-    // Draw network of users and items
-    drawConMap(gtData, "#conMap");
-    // })
 
     drawPCA(pcaData, "#pca");
     drawPCA(gtPcaData, "#gtPca")
 
+    // Draw network of users and items
+    drawConMap(data, "#conMap")
+    drawConMap(gtData, "#conMapGt");
+
+
+
 })
 
-//
-// d3.json("data/data.json").then(function(data){
-//     // d3.json("data/gt.json").then(function(gt) {
-//     d3.json("data/pca.json").then(function(pcaData){
-//
-//
-//
-//     })
-// })
+
+function nestData(data){
+    // nest the data into hierarchical structure
+    let innerNode = _.values(nest(data, ['PersonId', 'Label']));
+    let outerNode = nest(data, ['Label', 'PersonId']);
+    let links = [];
+    innerNode.forEach((d, i) => {
+
+        d["node"] = `user-${(i + 1).toString()}`;
+        d["links"] = _.keys(d).filter(d => d !== "node").map((v) => {
+            return {"source": `user-${(i + 1).toString()}`, "target": v, "width": d[v].length}
+        });
+        d["info"] = Object.values(d)
+        links.push(_.keys(d).filter(d => d !== "node").map((v) => {
+            return {"source": `user-${(i + 1).toString()}`, "target": v, "width": d[v].length}
+        }));
+        d["relatedNodes"] = _.keys(d).filter(v => (v !== "node") && (v !== "links"));
+        d["relatedNodes"].push(d["node"]);
+        d["relatedLinks"] = d["relatedNodes"].map(v => d["node"] + "-" + v);
+    });
+
+
+    // Transform data for outer nodes
+    outerNode = _.map(outerNode, (obj, key) => {
+        obj.node = key;
+        return obj
+    });
+
+    outerNode.forEach((d) => {
+        // d["node"] = d["Label"],
+        d["links"] = _.keys(d).filter(d => (d !== "node") && (d !== "links")).map((v, i) => {
+            return {"source": d.node, "target": `user-${v}`, "width": d[v].length}
+        });
+        d["relatedNodes"] = _.keys(d).filter(d => (d !== "node") && (d !== "links")).map(v => `user-${v}`);
+        d["relatedLinks"] = d["relatedNodes"].filter(d => (d !== "node") && (d !== "links")).map(v => `${v}-${d["node"]}`);
+        d["info"] = Object.values(d);
+    });
+
+    // Data for concept map
+    let newData = {"inner": innerNode, "outer": outerNode}
+    return newData
+}
