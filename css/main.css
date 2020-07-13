@@ -53,12 +53,12 @@ svg {
     fill: #f1faee;
 }
 
-.outer_node circle {
-    fill: #f1faee;
-    stroke: #1d3557;
-    stroke-width: 1.5px;
-    pointer-events: all;
-}
+/*.outer_node circle {*/
+/*    fill: #f1faee;*/
+/*    stroke: #1d3557;*/
+/*    stroke-width: 1.5px;*/
+/*    pointer-events: all;*/
+/*}*/
 
 .outer_node circle.highlight
 {
@@ -78,3 +78,7 @@ outer_node text.highlight{
 /*.link path.highlight{*/
 /*    stroke: #fc4903;*/
 /*}*/
+.images{
+    max-width: 100%;
+    height: auto;
+}
