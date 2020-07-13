@@ -62,12 +62,28 @@ svg {
 
 .outer_node circle.highlight
 {
-    stroke: #e63946;
+    stroke: #FF5733;
     stroke-width: 2px;
 }
 
+/*.comMap-link .highlight{*/
+/*    stroke: #dad55e;*/
+/*}*/
+
+/*.comMapGt-link .highlight{*/
+/*    stroke: #dad55e;*/
+/*}*/
+
 outer_node text.highlight{
     /*stroke:#e63946;*/
+}
+
+.links .conMap-link{
+    stroke: #600;
+}
+
+.links .conMapGt-link{
+    stroke: #060;
 }
 
 .link {

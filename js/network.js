@@ -29,10 +29,10 @@ const labels = ['birdCall',
     'yellowBalloon'];
 
 const margin ={
-    "top": 10,
-    "bottom": 10,
-    "left": 10,
-    "right": 10};
+    "top": 5,
+    "bottom": 5,
+    "left": 5,
+    "right": 5};
 
 
 const config = {
@@ -41,7 +41,7 @@ const config = {
     "rect_width": 40,
     "rect_height": 14,
     "link_width": "5px",
-    "diameter": 1200,
+    "diameter": 900,
     // "colors": ["#a50026","#d73027","#f46d43","#fdae61","#fee090","#ffffbf","#e0f3f8","#abd9e9","#74add1","#4575b4","#313695"],
     "iLength": 40,
     // "oLength": 43,
@@ -144,7 +144,7 @@ function drawConMap(data, selector){
         .attr("class", "links " + selector.slice(1) + "-link")
         .attr("id", d=>`${selector.slice(1)}-${d.source}-${d.target}`)
         .attr("fill", "none")
-        .attr("stroke", "#457b9d")
+        // .attr("stroke", "#457b9d")
         .attr("stroke-width", d=>d.width/4)
         // .attr("d", d=>diagonal(d))
         .attr("d", link);
@@ -167,7 +167,7 @@ function drawConMap(data, selector){
         .on("mouseover", function(d){
             console.log(this);
             // console.log(d);
-            d3.select(`#${this.id}`).attr("stroke-width", 2).attr("stroke", "#e63946");
+            d3.select(`#${this.id}`).attr("stroke-width", 2).style("stroke", "#FF5733");
             for (let i = 0; i < d.relatedNodes.length; i++)
             {
                 // d3.select(`#${d.relatedNodes[i]}`).classed('highlight', true);
@@ -177,11 +177,11 @@ function drawConMap(data, selector){
             }
 
             for (let i = 0; i < d.relatedLinks.length; i++){
-                d3.select("#" + this.id.split("-")[0]  + "-" + d.relatedLinks[i]).moveToFront().attr('stroke', '#fc4903');
+                d3.select("#" + this.id.split("-")[0]  + "-" + d.relatedLinks[i]).moveToFront().style('stroke', '#FF5733');
             }
         })
         .on("mouseout", function(d){
-            d3.select(`#${this.id}`).attr("stroke-width", 1.5).attr("stroke", "#1d3557");
+            d3.select(`#${this.id}`).attr("stroke-width", 1.5).style("stroke", "#1d3557");
 
             for (let i = 0; i < d.relatedNodes.length; i++)
             {
@@ -191,7 +191,7 @@ function drawConMap(data, selector){
             }
 
             for (let i = 0; i < d.relatedLinks.length; i++){
-                d3.select("#" + this.id.split("-")[0]  + "-" + d.relatedLinks[i]).attr("stroke", "#457b9d" );
+                d3.select("#" + this.id.split("-")[0]  + "-" + d.relatedLinks[i]).style("stroke", this.id.split("-")[0] == "conMap"? "#600": "#060" );
             }
         });
 
@@ -222,7 +222,7 @@ function drawConMap(data, selector){
         .on("mouseover", function(d){
             // console.log(this);
             // console.log(d);
-            d3.select(`#${this.id}`).attr("stroke-width", 3).attr("fill", "#e63946");
+            d3.select(`#${this.id}`).attr("stroke-width", 3).attr("fill", "#FF5733");
             for (let i = 0; i < d.relatedNodes.length; i++)
             {
                 // d3.select(`#${d.relatedNodes[i]}`).classed('highlight', true);
@@ -232,7 +232,7 @@ function drawConMap(data, selector){
             }
 
             for (let i = 0; i < d.relatedLinks.length; i++){
-                d3.select("#" + this.id.split("-")[0]  + "-" + d.relatedLinks[i]).moveToFront().attr('stroke', '#fc4903');
+                d3.select("#" + this.id.split("-")[0]  + "-" + d.relatedLinks[i]).moveToFront().style('stroke', '#FF5733');
             }
         })
         .on("mouseout", function(d){
@@ -246,7 +246,7 @@ function drawConMap(data, selector){
             }
 
             for (let i = 0; i < d.relatedLinks.length; i++){
-                d3.select("#" + this.id.split("-")[0]  + "-" + d.relatedLinks[i]).attr("stroke", "#457b9d" );
+                d3.select("#" + this.id.split("-")[0]  + "-" + d.relatedLinks[i]).style("stroke", this.id.split("-")[0] == "conMap"? "#600": "#060" );
             }
         });
     // Append user icons
@@ -269,16 +269,6 @@ function drawConMap(data, selector){
         .text(d=>d.node);
 }
 
-
-let nest = function (seq, keys) {
-    if (!keys.length)
-        return seq;
-    let first = keys[0];
-    let rest = keys.slice(1);
-    return _.mapValues(_.groupBy(seq, first), function (value) {
-        return nest(value, rest)
-    });
-};
 
 
 function projectX(x)

@@ -128,3 +128,14 @@ function nestData(data){
     let newData = {"inner": innerNode, "outer": outerNode}
     return newData
 }
+
+
+let nest = function (seq, keys) {
+    if (!keys.length)
+        return seq;
+    let first = keys[0];
+    let rest = keys.slice(1);
+    return _.mapValues(_.groupBy(seq, first), function (value) {
+        return nest(value, rest)
+    });
+};
