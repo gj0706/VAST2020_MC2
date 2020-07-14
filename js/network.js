@@ -166,7 +166,7 @@ function drawConMap(data, selector){
         .attr("stroke-width",  1.5)
         // .on("mouseover", mouseover)
         .on("mouseover", function(d){
-            console.log(this);
+            // console.log(this);
             // console.log(d);
             d3.select(`#${this.id}`).attr("stroke-width", 2).style("stroke", "#FF5733");
             for (let i = 0; i < d.relatedNodes.length; i++)
@@ -267,7 +267,8 @@ function drawConMap(data, selector){
         // .attr('id', d=>d.node)
         .attr('text-anchor', 'middle')
         .attr("transform", "translate(" + config.rect_width/2 + ", " + config.rect_height * .75 + ")")
-        .text(d=>d.node);
+        .text(d=>"Person" + d.node.split('-')[1])
+        .attr("font-size", '9px')
 }
 
 
