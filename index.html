@@ -15,7 +15,7 @@
     <link rel="stylesheet" href="css/network.css">
     <link rel="stylesheet" href="css/barchart.css">
 
-
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     <script src="https://kit.fontawesome.com/1788709282.js" crossorigin="anonymous"></script>
     <script src="lib/d3.v5.min.js"></script>
     <script src="lib/lodash.min.js"></script>
@@ -71,14 +71,17 @@
                             <div id="images"><p>Images</p></div>
                         </td>
                         <td style="width:35px">
+
+
                             <div id="pca"><p>Predicted PCA</p></div>
                             <div id="gtPca"><p>Ground Truth PCA</p></div>
+                            <div id="violin">Confidence Score distribution</div>
 
                         </td>
 
                         <td style="width:35px">
                             <div class="network conMap" id="conMap"><p>Predicted Network</p></div>
-                            <div class="network conMapGt" id="conMapGt"><p>Ground Truth Network</p></div>
+                            <div height="400px" class="network conMapGt" id="conMapGt"><p>Ground Truth Network</p></div>
 
                         </td>
 
@@ -111,6 +114,7 @@
     <script src="js/data.js"></script>
     <script src="js/barchart.js"></script>
     <script src="js/image.js"></script>
+    <script src="js/violin.js"></script>
     <script src="js/pca.js"></script>
     <script src="js/network.js"></script>
 

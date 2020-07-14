@@ -82,6 +82,7 @@ console.log(gtData);
     drawConMap(data, "#conMap")
     drawConMap(gtData, "#conMapGt");
 
+    drawViolin(allData[0], "#violin");
 
 
 })
